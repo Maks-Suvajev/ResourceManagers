@@ -17,7 +17,8 @@ class ResourceManager
         virtual ~ResourceManager() = default;
 
         void deleteElement(std::string key);
-        virtual void refreshElements() = 0;
+        void refreshElements();
+        virtual void registerElement(const std::filesystem::path& sourcePath) = 0;
 
         std::vector<std::string> getKeys();
         const std::unordered_map<std::string, std::unique_ptr<T>>& getMap();
@@ -29,7 +30,7 @@ class ResourceManager
         AssetRegistry*                                      m_assetRegistry;
         std::unordered_map<std::string, std::unique_ptr<T>> m_elements;
         std::filesystem::path                               m_activeDirectory;
-        std::vector<std::string>                            m_supportedFileTypes;
+        std::vector<std::string>                            m_supportedFileTypes; 
 };
 
 template<typename T>
@@ -77,6 +78,44 @@ void ResourceManager<T>::setCurrentActiveDirectory(std::string directory)
     m_activeDirectory = std::filesystem::path(directory);
 }
 
+template<typename T>
+void ResourceManager<T>::refreshElements()
+{
+    const auto& oldMap = getMap();
+
+    for (const auto& path : m_assetRegistry->getAllFilesOfType(m_activeDirectory, m_supportedFileTypes))
+    {
+        std::string key;
+        
+        try
+        {
+            key = std::filesystem::canonical(path).string();
+        }
+        catch(const std::exception& e)
+        {
+            std::cout << "ERROR::TextureManager::refreshTextures:: " << e.what() << std::endl;
+            continue;
+        }
+        
+        if (!oldMap.contains(key))
+        {
+            registerElement(path);
+        }
+    }
+
+    for (const auto& [key, element] : oldMap)
+    {
+        // Keep old keys as long as the file still exists
+        if (!std::filesystem::exists(key))
+        {
+            #ifdef ENABLE_DEBUG_MESSAGES
+                std::cout << "INFO::TextureManager::refreshTextures::Deleting key because it no longer exists: " << key << std::endl;
+            #endif
+
+            deleteElement(key);
+        };
+    }
+}
 
 
 #endif
