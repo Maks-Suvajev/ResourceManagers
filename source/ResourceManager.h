@@ -16,9 +16,12 @@ class ResourceManager
         ResourceManager(AssetRegistry* assetRegistry, std::vector<std::string> supportedFileTypes);
         virtual ~ResourceManager() = default;
 
-        void deleteElement(std::string key);
+        void deleteElement(const std::string& key);
         void refreshElements();
-        virtual void registerElement(const std::filesystem::path& sourcePath) = 0;
+        virtual void registerElement(const std::filesystem::path& sourcePath){};
+
+        virtual void registerElement(const std::string& key, T&& newElement){};
+
 
         std::vector<std::string> getKeys();
         const std::unordered_map<std::string, std::unique_ptr<T>>& getMap();
@@ -34,7 +37,7 @@ class ResourceManager
 };
 
 template<typename T>
-void ResourceManager<T>::deleteElement(std::string key)
+void ResourceManager<T>::deleteElement(const std::string& key)
 {
     m_elements.erase(key);
 }
