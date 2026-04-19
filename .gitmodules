@@ -1,12 +1,12 @@
 [submodule "Material"]
 	path = Material
 	url = git@github.com:Maks-Suvajev/Material.git
-[submodule "Mesh"]
-	path = Mesh
-	url = git@github.com:Maks-Suvajev/Mesh.git
 [submodule "Shader"]
 	path = Shader
 	url = git@github.com:Maks-Suvajev/Shader.git
 [submodule "Texture"]
 	path = Texture
 	url = git@github.com:Maks-Suvajev/Texture.git
+[submodule "Scene-Model"]
+	path = Scene-Model
+	url = git@github.com:Maks-Suvajev/Scene-Model.git
