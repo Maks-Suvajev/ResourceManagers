@@ -17,6 +17,10 @@ class ResourceManager
         virtual ~ResourceManager() = default;
 
         void deleteElement(const std::string& key);
+        T getElement(const std::string& key);
+        const T& getElementRef(const std::string& key);
+
+
         void refreshElements();
         virtual void registerElement(const std::filesystem::path& sourcePath){};
 
@@ -62,6 +66,33 @@ std::vector<std::string> ResourceManager<T>::getKeys()
 
     return keys;
 }
+
+template<typename T>
+T ResourceManager<T>::getElement(const std::string& key)
+{
+    auto it = m_elements.find(key);
+
+    if (it == m_elements.end() || !it->second)
+    {
+        throw std::runtime_error("ResourceManager::getElementRef:: Key not found: " + key);
+    }
+
+    return *it->second;
+}
+
+template<typename T>
+const T& ResourceManager<T>::getElementRef(const std::string& key)
+{
+    auto it = m_elements.find(key);
+
+    if (it == m_elements.end() || !it->second)
+    {
+        throw std::runtime_error("ResourceManager::getElementRef:: Key not found: " + key);
+    }
+
+    return *it->second;
+}
+
 
 template<typename T>
 const std::unordered_map<std::string, std::unique_ptr<T>>& ResourceManager<T>::getMap()
