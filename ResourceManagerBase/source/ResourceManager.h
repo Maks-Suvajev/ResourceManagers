@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "AssetRegistry.h"
+#include "DefaultShaders.h"
 
 template<typename T>
 class ResourceManager
@@ -20,12 +21,9 @@ class ResourceManager
         T getElement(const std::string& key);
         const T& getElementRef(const std::string& key);
 
-
         void refreshElements();
-        virtual void registerElement(const std::filesystem::path& sourcePath){};
-
-        virtual void registerElement(const std::string& key, T&& newElement){};
-
+        virtual void registerElement(const std::filesystem::path& /*sourcePath*/){};
+        virtual void registerElement(const std::string& /*key*/, T&& /*newElement*/){};
 
         std::vector<std::string> getKeys();
         const std::unordered_map<std::string, std::unique_ptr<T>>& getMap();
@@ -127,7 +125,7 @@ void ResourceManager<T>::refreshElements()
         }
         catch(const std::exception& e)
         {
-            std::cout << "ERROR::TextureManager::refreshTextures:: " << e.what() << std::endl;
+            std::cout << "ERROR::ResourceManager::refreshElements:: " << e.what() << std::endl;
             continue;
         }
         
@@ -139,17 +137,25 @@ void ResourceManager<T>::refreshElements()
 
     for (const auto& [key, element] : oldMap)
     {
+        // Default shaders are hardcoded, not files.
+        if (key == gfx::defaultShaderProgramKey ||
+            key == gfx::defaultVertexShaderKey  ||
+            key == gfx::defaultFragmentShaderKey
+        )
+        {
+            continue;
+        }
+
         // Keep old keys as long as the file still exists
         if (!std::filesystem::exists(key))
         {
             #ifdef ENABLE_DEBUG_MESSAGES
-                std::cout << "INFO::TextureManager::refreshTextures::Deleting key because it no longer exists: " << key << std::endl;
+                std::cout << "INFO::ResourceManager::refreshElements::Deleting key because it no longer exists: " << key << std::endl;
             #endif
 
             deleteElement(key);
         };
     }
 }
-
 
 #endif
